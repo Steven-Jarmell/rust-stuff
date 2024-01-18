@@ -157,3 +157,139 @@ Rust's `char` type is the language's most primitive alphabetic type
     - While loops are basic stuff
     - You can do `for element in a` to loop through a collection
     - If you do `for number in (1..4).rev()`, it will go backwards
+
+## Understanding Ownership
+
+### What is Ownership?
+
+- Ownership is a set of rules that govern how a Rust program manages memory
+- Memory is managed through a system of ownership with a set of rules that the compiler checks, and if any of the rules are violated, the program will not compile
+- In a systems programming language like Rust, whether a value is on the stack or heap affects how the language behaves and causes you to make certain decisions
+- Storing on the stack is faster than allocating on the heap b/c the allocator never has to search for a place to store new data
+- Ownership addressed keeping track of what parts of code are using what data on the heap, minimizes the amoutn of duplicate data on the heap, and cleans up unused data on the heap so you don't run out of space
+- Every value in rust has one owner, and when the owner goes out of scope, the value is dropped
+- The '::' allows you to access a namespace to avoid having to create funciton names like string_from, you can do String::from
+- String literals are hardcoded into the final executable since we know the contents at compile time and it doesn't change.
+- In order to support a growing piece of text (String mutable), we need to allocate an amount of memory on the heap at runtime to hold the contents.
+    - `let s = String::from("hello");` => String::from requests the memory
+    - Since rust has no GC, the way it frees the memory it requests at runtime is that it frees the memory once the variable it owns goes out of scope.
+    - When the variable goes out of scope, Rust calls a function called `drop`, which is where we put code to return the memory. Rust calls this function automatically at the closing curly bracket
+- If you have a String literal, it's variable is added to the stack, but the actual String contents are in heap memory. 
+    - If you make a second variable and set that equal to a string literal, it copies the pointer, length, and capacity which are on the stack and does not duplicate the heap contents because that would be expensive in runtime performance.
+    - However, since we need to free the memory at that pointer when the variable goes out of scope, this could cause a panic. To solve this, after you set `s2 = s1`, that will invalidate s1 and will compile error if you try to use it. 
+        - We say s1 `moved` to s2. It is no longer a shallow copy or deep copy
+        - When s2 goes out of scope it alone will free the memory and s1 will not
+        - Rust never automatically creates a deep copy of your data
+    - If we do want to deep copy the heap data, we can use the `clone` method
+        - Code is expensive
+- Stack only data can copy automatically for integers
+    - Types like integers have a known size at compile time and are entirely stored on the stacvk, so there's no reason we would want to prevent x from being valid after reassigning it.
+- Rust has a special annotation called the `Copy` trait that we can place on types stored in the stack. 
+    - If a type implements `Copy`, variables that use it do not move and are trivially copied, thus valid to use
+    - Rust will **not** let us annotate a type with `Copy` if it or any of its parts implement the `Drop` trait
+        - `Drop` indicates that the type needs something special to happen when the value goes out of scope and thus adding `Copy` causes a compile-time error
+        - ALl integer types, boolean types, floating point types, character types, and tuples (if they contain types that also implement `Copy`) have the `Copy` implementation
+- When you pass a value to a function, it will move or copy just like it will durring assessment. (Anything with a Copy can still be used after reassigning its value)
+- Ownership is so powerful because stuff like primitives, and anything you make a `Copy` trait for can all be pushed to the stack and its value reassigned while keeping the variable accessible, whereas if it was on the Heap with no `Copy`, or if it has a `Drop` trait implementation, if it is reassigned, the previous variable is no longer able to be used
+- It is annoying that anything we pass into a funciton needs to be passed back if we want to use it again, but Rust allows us to return multiple values using a tuple.
+- However, Rust lets you use a value without transferring ownership, called **references**
+
+### References and Borrowing
+
+If we provide a reference (pointer to an address), rather than the variable, we can access the data
+
+`let len = calculate_length(&s1);`
+- Creates a reference that refers to the value of s1 but does not own s1. Thus, the value it points to will not be dropped when its reference is no longer used
+
+The action of creating a reference is called `Borrowing`
+
+Just as variables are immutable by default, so are references. We cannot modify something we have a reference to.
+
+**DOES NOT WORK:**
+fn main() {
+    let s = String::from("hello");
+
+    change(&s);
+}
+
+fn change(some_string: &String) {
+    some_string.push_str(", world");
+}
+
+We can create mutable references:
+
+**DOES WORK:**
+fn main() {
+    let mut s = String::from("hello");
+
+    change(&mut s);
+}
+
+fn change(some_string: &mut String) {
+    some_string.push_str(", world");
+}
+
+Mutable References have one big restriction, that if you have a mutable reference to a value, you can have NO OTHER REFERENCES to that value.
+
+By preventing multiple mutable references to the same data at the same time allows for very controlled mutation. 
+- Prevents data races at compile time
+- Data races are similar to race conditions and cause undefined behavior.
+
+Way around it:
+
+let mut s = String::from("hello");
+
+{
+    let r1 = &mut s;
+} // r1 goes out of scope here, so we can make a new reference with no problems.
+
+let r2 = &mut s;  
+
+**Cannot combine mutable and immutable references**
+
+Multiple immutable references are cool because no on ewho is reading the data has the ability to affect anyone else's reading of the data
+
+In languages with pointers it's easy to create dangling pointers (a pointer that references a location in memory that may have been given to someone else). However, Rust's compiler guarantees that references will never be dangling references
+
+Dangling Pointer Example:
+
+fn dangle() -> &String { // dangle returns a reference to a String
+
+    let s = String::from("hello"); // s is a new String
+
+    &s // we return a reference to the String, s
+} // Here, s goes out of scope, and is dropped. Its memory goes away.
+// Danger!  
+
+When dangle is finished executing, s is deallocated due to `Drop`, thus this method would return a pointer to an address that was deallocated. Rust's compiler will throw an error if it recognizes this.
+
+This is the solution:
+
+fn no_dangle() -> String {
+    let s = String::from("hello");
+
+    s
+}
+
+Directly return the string, rather than a reference to it is best here.
+
+### The Slice Type
+
+Rust has string slices, which are references to a part of a string
+
+let s = String::from("hello world");
+
+let hello = &s[0..5];
+let world = &s[6..11];
+
+Rust's '..' range syntax
+- If you want to start at index 0, you can drop the value before, like `&s[..5]`
+- [starting_index..ending_index]. Ending index is one more than the last position
+- If you want to end at the end of the string, you can drop the value after, like `&s[5..]`
+- If you want the whole string, you do &s[..]
+
+When using slices, the compiler ensures that the references to the String remain valid, by not letting a mutable change if it is borrowed as immutable elsewhere.
+
+If we have a string slice, we can pass that directly
+
+STILL ON 4.3
