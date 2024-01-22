@@ -407,3 +407,67 @@ Assocated functions that are not methods are used for constructors that will ret
 
 You can separate methods in an `impl` block into multiple separate `impl` blocks, but theres no reason for now.  
 
+## Enums and Pattern Matching
+
+Enums simply say a value is one of a possible set of values.  
+
+Enums in Rust allow you to put data into a variant of an enum, for example:  
+
+`enum IpAddr {
+    V4(String),
+    V6(String),
+}
+
+let home = IpAddr::V4(String::from("127.0.0.1"));
+
+let loopback = IpAddr::V6(String::from("::1"));`
+
+However an even better way is this:
+
+struct Ipv4Addr {
+    // --snip--
+}
+
+struct Ipv6Addr {
+    // --snip--
+}
+
+enum IpAddr {
+    V4(Ipv4Addr),
+    V6(Ipv6Addr),
+}
+
+Enums can have any kind of data, even another enum.  
+
+We can define methods on enums like we can on structs  
+
+### The `Option` Enum 
+The `Option` type encodes the very common scenario in which a value could either be something or nothing  W
+
+Rust does not have a null feature that other languages do  
+
+The problem with null values is that if you try to use `null` as a `non-null` value, you'll get an error
+
+Rather than having nulls. Rust has an enum that encodes a value being present or absent.
+
+The Option<T> enum is so useful that it is in the prelude and you don't need to add it explicitly into the scope
+
+When we have an Option<T>, we have to worry about possibly not having a value and then compiler makes sure we handle that case before actually using the value.
+- You have to convert an Option<T> to a T before you can perform T operations with it.
+- This helps catch one of the most common issues with null: Assuming that something isnt null when it actually is.
+
+The `match` expression is a control flow construct that runs when you have Some(T) and will run something else when it is None
+
+### Match
+
+Match allows you to compare a value against a series of patterns and then execute code based on the matched pattern  
+
+Common Rust pattern: `match` against an enum, bind a variable to the data inside, then execute code based on it
+
+Match allows you to _ or other as a catch-all in a match expression
+
+### `if let`
+
+Good for cases where you want a less verbose way to handle values that match one pattern and ignore the rest  
+
+However, you lose the exhaustive checking that `match` requires
