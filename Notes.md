@@ -471,3 +471,37 @@ Match allows you to _ or other as a catch-all in a match expression
 Good for cases where you want a less verbose way to handle values that match one pattern and ignore the rest  
 
 However, you lose the exhaustive checking that `match` requires
+
+## Managing Growing Projects with Packages, Crates, and Modules
+
+**Packages:** A Cargo feature that lets you build, test, and share crates
+**Crates:** A tree of modules that produce a library or executable
+**Moduels and use:** Let you control the organization, scope, and privacy of paths
+**Paths:** A way of naming an item, such as a struct, funciton, or module
+
+A crate is the smallest amount of code that a rust compiler considers at a time  
+
+Two Types of Crates:
+- Binary Crates: Programs you compile to an executable that runs
+    - Each must have a main function
+- Library Crates
+    - No main function 
+    - Rather than compile to an executable, they define functionality that you include in a project later on
+
+The crate root is a source file that the Rust compiler starts from and makes up the root module of the crate  
+
+A package is a bundle of one or more crates that provides a set of functionality
+- Contain a `Cargo.toml` file that describes how to build the crates
+- Packages can only contain one binary crate
+
+Cargo follows a convention that src/main.rs is the crate root of a **binary** crate with the same name as the package.  
+
+Cargo knows that if the package contains src/lib.rs, the package contains a **library** crate with the same name as the package.  
+
+Cargo passes the crate root files to `rustc` to build the library or binary
+
+If a package contains src/main.rs **and** src/lib.rs, it has two crates: a binary and library  
+
+A package can have multiple binary crates by playing files in the src/bin directory and each file will be a separate binary crate  
+
+On 7.2
