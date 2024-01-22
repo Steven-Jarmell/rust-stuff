@@ -292,4 +292,6 @@ When using slices, the compiler ensures that the references to the String remain
 
 If we have a string slice, we can pass that directly
 
-STILL ON 4.3
+In Rust you can take advantage of something called deref coercions, in which you define a method to take a slice instead of a reference which can make APIs more generalizable.
+
+There's a general slice type you can also use for arrays
