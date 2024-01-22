@@ -294,4 +294,116 @@ If we have a string slice, we can pass that directly
 
 In Rust you can take advantage of something called deref coercions, in which you define a method to take a slice instead of a reference which can make APIs more generalizable.
 
-There's a general slice type you can also use for arrays
+There's a general slice type you can also use for 
+
+## Using Structs to Structuer Related Data
+
+A struct is a custom data type that lets you package together and name multiple related values that make up a group  
+
+Structs are similar to tuples in the sense that they can hold multiple related values. However, with structs you do not have to rely on the order of the data because you have to name every attribute
+
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+
+After you define a struct, you can create an instance by utilizing key/value pairs
+
+Structs use dot notation to access values in them
+
+The entire instance of a struct must be mutable and Rust **does not** allow us to mark only certain fields as mutable  
+
+Rust has a field init shorthand syntax that allows you to get rid of repetition, for example:
+
+fn build_user(email: String, username: String) -> User {
+    User {
+        active: true,
+        username: username,
+        email: email,
+        sign_in_count: 1,
+    }
+}  
+
+**Becomes**
+
+fn build_user(email: String, username: String) -> User {
+    User {
+        active: true,
+        username,
+        email,
+        sign_in_count: 1,
+    }
+}  
+
+There is also a struct update syntax which allows for you to use less code when copying one struct instance into a new one.
+
+let user2 = User {
+        active: user1.active,
+        username: user1.username,
+        email: String::from("another@example.com"),
+        sign_in_count: user1.sign_in_count,
+};  
+
+**Becomes**
+
+let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1
+};  
+
+You can also use the tuple structs without named fields to create different types
+
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+There are also unit like structs that do not have any field
+- Useful when you need to implement a trait on some type but don't have any data you want to store in the type
+
+struct AlwaysEqual;
+
+fn main() {
+    let subject = AlwaysEqual;
+}
+
+When defining structs, we want every instance to own all its data and for that data to be valid for as long as the struct is valid. Thus, we don't want to use slices like `&str` and instead use `String`  
+
+A struct __can__ refer to data owned by something else but it requires the use of lifetimes, which ensure that the data referenced by a struct is valid for as long as the struct is.   
+
+The println! macro can do many kinds of formatting and by default uses the `Display` output. Primitives and other stuff implement this by default.
+
+If we have `println!("rec1 is {:?}", rect1);`, it will print the instance of the struct in one line.  
+
+If we have `println!("rec1 is {:#?}", rect1);`, it will print the instance of the struct in multiple lines.  
+
+There's also a dbg! macro that will print out to `stderr` and will also evaluate the expression.  
+
+### Method Syntax
+
+Methods are similar to functions but are defined __within__ the context of a struct and their first parameter is always `self`  
+
+To define a function within the context of a Struct, you start an implementation block (`impl`)  
+
+The &self in the method parameter is short for `self: &Self`
+
+When you simply want to read the data from a struct and not write to it, it is always best to just borrow the struct reference.  
+
+If we wanted to change the isntance we'd use `&mut self`
+
+If we wanted to take ownership of the instance, we'd use `self`  
+- This is rare
+- Technique used when the method transforms self into something else and you want to prevent the caller from using the original instance after transforming it  
+
+**The main reason for using a method instead of functions is for organization**  
+
+You can give method names the same as a structs attributes, the difference is that you call methods with () and access the attributes without ()
+
+Rust does not have the `->` operator that is in C and C++, and instead has automatic referncing and dereferencing. Given the reader and name of a method, Rust can figure out whether the method is reading (&self), mutating (&mut self), or consuming (self).
+
+All functions defined within an `impl` block are called `associated functions` since they're assocated with the type named after the `impl`  
+
+Assocated functions that are not methods are used for constructors that will return a new instance of the struct, often called `new`.  
+
+You can separate methods in an `impl` block into multiple separate `impl` blocks, but theres no reason for now.  
+
