@@ -859,3 +859,32 @@ One special lifetime is `'static`, which says the affected reference can live fo
 
 ## Testing
 
+The bodies of test functinos perform these three actions:
+1. Set up any needed data or state
+2. Run the code you want to test
+3. Assert the results are what you expect  
+
+A test in Rust is a funciton thats associated with the test attribute
+
+TO change a funciton into a test function add `#[test]` on the line before fn
+
+assert_eq! macro is very useful  
+
+cargo test is how to run a test suite  
+
+Tests fail if something in the test function panics. Tests are all run in a new thread, so when the main thread sees that the test thread has died, the test is marked as failed.  
+
+The assert! macro is also useful to ensure that a condition evaluates to true  
+
+assert_ne! macro is also another common way
+
+You can insert custom failure messages with assert
+
+There is a #[should_panic] attribute you can add to a test function so that the test passes if the function panics  
+- You can add an expected message to ensure that the panic message also is what we expect it to be  
+
+cargo test has a lot of optional arguments like how many threads to run, show output, if you want to run one individual tests, etc.
+
+Can add #[ignore] to skip a test case
+
+On 11.3
