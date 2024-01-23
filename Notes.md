@@ -586,3 +586,76 @@ use std::io{self, Write};
 
 The Glob operator: use std::io::*;
 
+## Common Collections
+
+Three collections that are used very often:
+- Vectors which allow you to store a variable number of values next to each other
+- String which is a colleciton of characters
+- Hash map which is a key value pair sotre
+
+### Vectors
+- Can only store values of the same type
+- Variable number of values  
+
+There are two ways to get values from a vector
+- With indexing syntax: &[i]
+- With the get method
+
+Gives us two options, using the indexing can cause the program to panic, while get ensures you handle that case  
+
+Because vectors put the values next to each other in memory, adding a new element to the end might require allocating new memory and copying the old elements to the new space.
+
+Iterating over a vector is safe because of the borrow checker's rules. If we attempted to insert or remove items then we would get a compiler error
+
+To get around vectors only storing the same types, we can use an enum  
+
+Like other structs, vectors are freed when they go out of scope.
+
+### Strings
+
+Rust only has one type in the core language: the string slice str -> `&str`
+- These are references to some UTF-8 encoded string data stored elsewhere
+    - String literals are stored in the program's binary
+
+The `String` type is in the stdlib and is growable, mutable, owned, and UTF-8 encoded. 
+
+Since all strings are UTF-8 encoded, we can include any properly encoded data  
+
+Both push_str and push methods don't take ownership of the caller or argument
+
+The + operator is also used to combine strings, but because of it's method signerature, you lose ownership of the first string.
+
+let s1 = String::from("tic");
+let s2 = String::from("tac");
+let s3 = String::from("toe");
+
+let s = s1 + "-" + &s2 + "-" + &s3;
+
+s1 in this example loses ownership because the `add` funciton is actually called and takes ownership of s1, appending s2 and s3 onto the string in the heap.
+
+**Rust strings do not support indexing**  
+
+In Rust, a string is a wrapper over `Vec<u8>`  
+
+This is an edge case:
+
+let hello = String::from("Здравствуйте");
+
+The length of this is not 12, it is instead 24.  
+These unicode scalar values take 2 bytes of storage instead of 1. Thus an index into the string's bytes will not always correlate to a valid Unicode scalar value.  
+
+To get a character in a string, we are expecting it to take O(1), but it isn't possible to guarantee that performance with String since Rust would have to walk through the contents from the beginning to the index to determine how many valid chars there are.  
+
+Rather than indexing a string with [] you should use a range to create a string slice containing a number of bytes  
+
+The best way to operate on a string is to be explicit about whether you want chars or bytes.  
+
+### Hash Maps  
+
+For elements that we insert that implement the Copy trait, the elements are copied.  
+
+For elements that are owned like String, the values are moved and the hashmap will be the owner of the values and the variables that used to have them will be invalid.  
+
+Rust Hashmaps default to overwriting values at a duplicate key.  
+
+The hashmap `entry` takes the key you want to check, and if it is not there, we can use .or_insert() to add a value at that key
