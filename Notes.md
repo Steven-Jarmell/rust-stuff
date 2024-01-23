@@ -710,3 +710,152 @@ If someone calls your code and passes incorrect values, its best to return an er
 
 When failure is expected its more appropriate to return a `Result` like rate limiting  
 
+## Generic Types, Traits, and Lifetimes  
+
+Lifetimes are a variety of generics that give the compiler enough information about how references relate to each other. This esnures that references are valid in more situations. 
+
+Enums can also have generic data types in their variants  
+
+Generics do not have slower programs if they use generics thanks to monomorphization of code using generics at compile time
+- Monomorphization is when you turn generic code into specific code by filling in the conrete types used when compiled
+    - Essentially, the compiler looks at all the places where the generic code is called and generates code for the conrete types the generic code is called with. 
+
+### Traits
+Traits are like interfaces in other languages.
+
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+Each type implementing Summary must include summarize
+
+To implement a trait for a struct:
+impl Summary for Tweet {
+    fn summarize(&self) -> String {
+        ...
+    }
+}
+
+We can use traits as parameters  
+- The method will accept any item that implements the specified trait
+- In the method we can call any item that comes from the trait  
+
+Two ways to use traits as parameters:
+
+Syntactic sugar:
+pub fn notify(item1: &impl Summary, item2: &impl Summary) 
+
+Better for more complex
+pub fn notify<T: Summary>(item1: &T, item2: &T) 
+
+Multiple traits in parameter:
+
+pub fn notify(item: &(impl Summary + Display))
+
+OR
+
+pub fn notify<T: Summary + Display>(item: &T)
+
+The + is a trait bound which allows you to clain traits, but this can also get hard to read when it gets very long so there is a where clause
+
+Example:  
+
+fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32
+
+Using the clause:  
+
+fn some_function<T, U>(t: &T, u: &U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{}
+
+We can use a trait as a return type to return any value of a type that implements a trait
+
+We can conditionally implement methods using traits
+
+use std::fmt::Display;
+
+struct Pair<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+// Will only get implemented if the innter type T implements the PartialOrd trait as well
+impl<T: Display + PartialOrd> Pair<T> {
+    fn cmp_display(&self) {
+        if self.x >= self.y {
+            println!("The largest member is x = {}", self.x);
+        } else {
+            println!("The largest member is y = {}", self.y);
+        }
+    }
+}
+
+We can also conditionally implement a trait for any type that implements another trait
+
+// If the type implements the Display trait, the ToString will be implemented on T as well
+// Lets us call ToString on any type that implements Display
+impl<T: Display> ToString for T {
+    // --snip--
+}
+
+### Validating References with Lifetimes  
+
+Every reference in Rust has a lifetime, or the scope for which that reference is valid for
+
+Most of the time a lifetime is implicit and we must only annotate types when multiple types are possible.
+
+We must annotate lifetimes when the lifetimes of references could be related in different ways. We must annotate the relationships using generic lifetime parameters
+
+#### Lifetime Annotation Syntax
+The compiler for Rust has a borrow checker which compares scopes to determine whether all borrows are valid and will not compile if any is invalid.  
+
+The names of lifetime parameters must start with an apostrophe and are usually all lowercase and very short  
+- Most use the name `'a`
+
+&i32        // a reference
+&'a i32     // a reference with an explicit lifetime
+&'a mut i32 // a mutable reference with an explicit lifetime
+
+If you define a return time as `&'a str`, this means the returned reference will be valid as long as both of the parameters are valid.
+
+By using these, we tell the Rust borrow checker to reject any values that don't adhere to the constraints we specify.  
+
+By having function signatures contain the lifetime contract means the analysis the compiler does can be simpler  
+
+When returning a reference from a function, the lifetime parameter for the return type needs to match the lifetime parameter for one of the parameters  
+
+Lifetime syntax is about connecting the lifetimes of various parameters and return values of functions. When they're connected, Rust has enough information to allow memory-safe operations and disallow operations that create dangling pointers and violate memory safety.  
+
+There are patterns programmed into rust called the lifetime elision rules.
+
+Basically, a function header like this:
+
+fn first_word(s: &str) -> &str  
+
+Can be written as:  
+
+fn first_word<'a>(s: &'a str) -> &'a str  
+
+Since the Rust team found a lot of rust programmers were entering the same lifetime annotations over and over in particular situations  
+
+If rust can't infer the lifetimes, thats when it will give an error.  
+
+Might want to go back and read this section 10.3
+
+Lifetime Elision Rules
+1. The compiler assigns a lifetime parameter to each parameter that's a reference. These parameters are not equal to each other.
+2. If there is exactly one input lifetime parameter, that lifetime is assigned to all output lifetime parameters.
+3. If there's multiple input lifetime parameters, but one if &self or &mut self, the lifetime of self is assigned to all output lifetime parameters. 
+
+One special lifetime is `'static`, which says the affected reference can live for the entire duration of the program. ALl string literals have the `'static` lifetime.
+
+## Testing
+
