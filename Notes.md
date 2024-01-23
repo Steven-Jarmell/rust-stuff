@@ -504,4 +504,85 @@ If a package contains src/main.rs **and** src/lib.rs, it has two crates: a binar
 
 A package can have multiple binary crates by playing files in the src/bin directory and each file will be a separate binary crate  
 
-On 7.2
+Paths in Rust can take two forms:  
+- Absolute: Full path starting form a crate root
+    - For code from an external crate, this begins with the crate name
+- Relative: Path starts from the current module and uses `self`, `super`, or an identifier in the current module
+
+Paths are always separated by `::`  
+
+Rust's preference in general is to specify absolute paths because it's more likely we'll want to move code defintions and item calls independently of each other.  
+
+In Rust, all items including functions, methods, structs, enums, modules, and constants are private to parent modules by default.  
+
+Items in a parent module can't use the private items inside child modules but items in child modules can use items in their ancestor modules.  
+
+Making a module public doesn't make its contents public, it only lets code in its ancestor modules refer to it  
+
+We can create relative paths that begin in the parent module rather than the current module by using `super`
+- Like starting a filesystem with `..` syntax.
+
+### Public Structs and Enums  
+
+If we use pub before a struct definition, we make the struct public but it's fields will still be private.
+- You can thus make each field public or not on a case-by-case basis.
+
+If a struct has a private field, the struct must provide a public associated function that creates an instance of itself. Without this constructor, we couldn't set the value of the private field.  
+
+When you designate an enum as public, we can use all its variants.
+
+### Bringing Paths into Scope with `use`  
+
+You can bring whole modules into scope like this:
+
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+use crate::front_of_house::hosting;
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+}
+
+Use essentially creates a symbolic link in the filesystem. By using `use` in the crate root, `hosting` is now a valid  
+
+THere's a convention that when bringing in functions, just bring the parent module in and call the methods on the parent module like with a hashmap:
+
+use std::collections::HashMap;
+
+fn main() {
+    let mut map = HashMap::new();
+    map.insert(1, 2);
+}
+
+However, with stuff like enums and structs, just bring them explicitly into the scope.  
+
+You can use the as keyword to give an alias to imports:
+
+use std::io::Result as IoResult;
+
+To bring external packages, you use `use {crate_name}::{items we want to bring into scope}`
+
+We can use nested paths to clean up large use lists
+
+use std::cmp::Ordering;
+use std::io;
+
+Turns into:  
+
+use std::{cmp::Ordering, io};  
+
+Another example:  
+
+use std::io;
+use std::io::Write;
+
+becomes:  
+
+use std::io{self, Write};
+
+The Glob operator: use std::io::*;
+
