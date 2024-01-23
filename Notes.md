@@ -659,3 +659,54 @@ For elements that are owned like String, the values are moved and the hashmap wi
 Rust Hashmaps default to overwriting values at a duplicate key.  
 
 The hashmap `entry` takes the key you want to check, and if it is not there, we can use .or_insert() to add a value at that key
+
+## Errors
+
+### `panic!` macro
+
+- Either we explicitly call it or mess up some code.  
+
+Panics by default print a failure message, unwind, clean the stack, and quit.  
+
+A backtrace is a list of all the functions that were called to get to the panic  
+
+### Recoverable Errors with `Result`  
+
+Match expressions can get large and hard to read. There are methods in the standard library like `unwrap_or_else` that clean up huge nested match expressions  
+
+There is a method `unwrap` which will return the value of a Result if its Ok, else if it is Err then it will call the panic! macro for us.
+
+There is another method `expect` that works like `unwrap` but lets us write a custom error message
+
+In Prod Quality Code, most Rustaceans use expect rather than unwrap and give more context  
+
+Propagating errors (returning the error rather than handling it inside the function itself) gives more control to the calling code.  
+
+Rust added the `?` operator to make propagating easy
+- Works in almost the same way as the match expressions shown here:
+
+let mut username_file = match username_file_result {
+        Ok(file) => file,
+        Err(e) => return Err(e),
+};
+
+BECOMES:  
+
+let mut username_file = File::open("hello.txt")?;  
+
+There is a standard library function `fs::read_to_string();` that lets us read a file into a string.  
+
+The `?` operator can only be used with functions that return a Result, Option, or another type that implements FromResidual  
+
+A main function that returns a `Result<(), E>`, the executable will exit with a value of 0  
+
+### Guidelines for Error Handling  
+
+It's advisable to have your code panic when it could end up in a bad state
+- A bad state is something that is unexpected, as opposed to something that will happen occasionally like bad user input
+- Code needs to rely on not being in this bad state
+
+If someone calls your code and passes incorrect values, its best to return an error to let the user of the library decide what they want to do  
+
+When failure is expected its more appropriate to return a `Result` like rate limiting  
+
