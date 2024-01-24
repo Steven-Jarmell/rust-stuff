@@ -923,3 +923,56 @@ Many programmers expect a new function to never fail, so if there is a case it c
 CLI programs are expected to send error messages to stderr so we can still see error messages even if we redirect stdout  
 
 THere is a `eprintln!` macro that prints to stderr  
+
+## Iterators and Closures
+
+An important part of writing idiomatic fast Rust code is mastering closures and iterators  
+
+### Closures  
+Closures are anonymous functions that you can save in a variable or pass as an argument  
+- Unlike functions, closures can capture values from the scope in which they're defined  
+
+Closures don't usually require you to annotate the types of parameters or the return value  
+
+Custom closure:  
+`
+let expensive_closure = |num: u32| -> u32 {
+    println!("calculating slowly...");
+    thread::sleep(Duration::from_secs(2));
+    num
+};
+
+Closures can capture values from their environment in three ways
+- borrowing immutably
+- borrowing mutably
+- taking ownership
+
+When you want to force the closure to take ownership, you can use the `move` keyword  
+- Useful when passing a closure to a new thread to move the data so that its owned by the new thread  
+
+`move` example:
+
+use std::thread;
+
+fn main() {
+    let list = vec![1, 2, 3];
+    println!("Before defining closure: {:?}", list);
+
+    thread::spawn(move || println!("From thread: {:?}", list))
+        .join()
+        .unwrap();
+}
+
+What happens when closure captures a reference or ownership
+- Move a captured value out of closure
+- Mutate captured value
+- Neither more nor mutate
+- Capture nothing from the environment to begin with
+
+Closures automatically implement 1-3 of Fn traits:
+- `FnOnce` applies to all closures that can be called once and all closures implement this trait since they can be called.
+    - A closure that moves captured values out of its body will only implement FnOnce and none of the other Fn traits
+- `FnMut` applies to closures that don't move captured values out of the body but might mutate the captured ones
+- `Fn` applies to closures that don't move captured values out of their body and that don't mutate captured values.  
+
+On 13.1 still
