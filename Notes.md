@@ -887,4 +887,15 @@ cargo test has a lot of optional arguments like how many threads to run, show ou
 
 Can add #[ignore] to skip a test case
 
-On 11.3
+#[cfg(test)] tells Rust to compile and run the test code only
+
+### Integration Testing  
+We can create a tests directory at the top level of our project directory, and Cargo looks for integration tests there.  
+
+You can specify Cargo to just run the integration tests with `cargo test --test {name of integ test file}`  
+
+If we create a `common.rs` file and have a setup function, we can add some code to setup that we want to call from multiple test functions.
+- However, we want to create a common folder and a file within it called mod.rs so that Rust doesn't treat common as a integration test 
+
+If our project is only a binary crate and not also a library, we can't create integration test  
+
