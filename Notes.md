@@ -899,3 +899,27 @@ If we create a `common.rs` file and have a setup function, we can add some code 
 
 If our project is only a binary crate and not also a library, we can't create integration test  
 
+## I/O Project  
+
+Rust community has guidelines for when main starts getting large:  
+- Split program into a main.rs and a lib.rs and move the logic to lib.rs
+- CLI parsing can remain in main as long as it is small
+- Move CLI parsing to lib.rs when it starts getting complicated
+
+Main function responsibilities:
+- Calling CLI parsing logic with the arg values
+- Setting up other config
+- Calling a run function in lib.rs
+- Handling the error if run returns an error
+
+Main runs the program and lib.rs handles all logic  
+
+Using `clone` to fix ownership problems should be avoided because of its runtime costs, but is acceptable at times due to the simplicity it brings.  
+
+Many programmers expect a new function to never fail, so if there is a case it can return Err, call it build  
+
+`Box<dyn Error>` means that the funciton will return a type that implements the Error trait  
+
+CLI programs are expected to send error messages to stderr so we can still see error messages even if we redirect stdout  
+
+THere is a `eprintln!` macro that prints to stderr  
