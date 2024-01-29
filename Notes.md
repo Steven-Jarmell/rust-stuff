@@ -975,4 +975,21 @@ Closures automatically implement 1-3 of Fn traits:
 - `FnMut` applies to closures that don't move captured values out of the body but might mutate the captured ones
 - `Fn` applies to closures that don't move captured values out of their body and that don't mutate captured values.  
 
-On 13.1 still
+### Iterators  
+
+Iterator patterns allow you to perform some task on a sequence of items in turn.  
+
+Rust iterators are lazy, meaning they have no effect until you call methods that consume the iterator  
+
+Iterator adaptors are methods defined on the `Iterator` trait that don't consume the iterator and produce different iterators  
+
+Iterators have a `collect` method which consumes the iterator and collects the resulting values into a collection data type.  
+
+You can chain multiple calls to iterator adaptors to perform **complex actions in a readable way** but since they are all lazy, you have to call the consuming adaptor methods to get the results.  
+
+Most Rust programmers prefer to use iterator style  
+
+### Performance loops vs iterators  
+
+Although iterators are a high-level abstraction, they get compiled to roughly the same code as if you'd written the lower level code yourself  
+- They are one of Rust's zero-cost abstractions  
