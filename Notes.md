@@ -993,3 +993,103 @@ Most Rust programmers prefer to use iterator style
 
 Although iterators are a high-level abstraction, they get compiled to roughly the same code as if you'd written the lower level code yourself  
 - They are one of Rust's zero-cost abstractions  
+
+## Cargo and Crates.io  
+
+In Rust, release profiles are predefined and customizable profiles with different configurations let you have options for compiling code  
+
+Dev: `cargo build`  
+Release: `cargo build --release`  
+
+Cargo has a defule settings for optimization level (these are the default ones):  
+
+[profile.dev]  
+opt-level = 0  
+
+[profile.release]  
+opt-level = 3   
+
+If you push your crates to crates.io, you should comment the code with ///  
+
+You can generate HTML documentation from comments using `cargo doc`  
+
+Sections commonly used in documentation:
+- Examples
+- Panics
+    - The scenarios when it can panic  
+- Errors
+    - If it returns a result, you can describe the errors that might occur
+- Safety
+    - If the funciton is `unsafe`, there should be a section why
+
+When you run `cargo test`, it will run the code in the documentation examples  
+
+The //! comment adds documentation to the item that contains the comments rather than to the items after the comments  
+
+You add crate metadata using the `Cargo.toml` file.  
+
+Use `cargo publish` to upload new versions of existing crates  
+
+Use `cargo yank --vers {num}` to deprecate a version, and if you want to undo the deprecation you can add `--undo`  
+
+yank does not delete code----------
+
+`Cargo Workspaes` are used if the library crate keep sgetting bigger and you want to split the package into multiple library crates  
+
+A workspace is a set of packages that share the same `Cargo.lock` and output directory  
+
+You must create a new folder with a Cargo.toml file and rather than a [package] section, it will have a [workspace] section  
+
+## Smart Pointers
+
+The references in Rust are indicated by the & and don't have capabilities other than referring to data and no overhead  
+
+Smart pointers are data structures that act like a pointer but have additional metadata and capabilities.  
+
+Smart pointers own the data they point to  
+- String
+- Vec<T>
+
+Smart pointers are usually implemented using structs  
+- Implement Defer and Drop traits  
+
+You are allowed to write your own smart pointers  
+- Box<T> for allocating values on the heap
+- Rc<T> a reference counting type that enables multiple ownership
+- Ref<T> and RefMut<T> accessed through RefCell<T> is a type that enforces the borrowing rules at runtime instead of compile time  
+
+### Box<T>
+Boxes don't have performance overhead other than storing on the heap instead of the stack. Use when:  
+- You have a type whose size can't be known at compile time  
+- YOu have a large amount of data and you want to transfer ownership but ensure data won't be copied when you do so
+- You want to own a value and you care only that its a type that implements a particular trait rather than being a specific type
+
+A value of recursive type can have another value of the same type as part of itself.  
+- Since nesting of values of recursive types ould theoretically continue infinitely so Rust can't know how much space the value needs.  
+  
+A cons list is a data structure that is short for construction function  
+
+Implementing the `Deref` trait lets you customize the behavior of the dereference operator *
+
+After implementing deref for a struct, `*y` becomes `*(y.deref())`  
+
+Deref coercion converts a reference to a type that implements the Deref trait into a refrence to another type  
+
+Because String implements the Deref trait such that it returns &str, we can convert &String to &str  
+
+You can use the DerefMut trait to override the * operator on mutable references  
+
+The second trait important to the smart pointer pattern is `Drop`, which lets you customize what happens when a value is about to go out of scope  
+
+It's not straightforward to disable to automatic drop functionality, and disabling it isn't usually necessary  
+
+We can't call drop because Rust still automatically calls drop at the end of main, thus it would cause a double free error.  
+
+If we want to force a value to be cleaned up early, we can use the `std::mem::drop` function which is different from the Drop trait version of drop. 
+
+There are cases when a single value might have multiple owners, and to enable that you must use `Rc<T>` 
+- Allocates some data on the heap for multiple parts of our program to read and we can't determine at compile time which part will finish using the data last. 
+- Only for single-threaded scenarios  
+
+Cloning an `Rc<T>` also increases the reference count  
+
