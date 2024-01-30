@@ -1163,3 +1163,54 @@ A thread pool is a group of spawned threads that are waiting and ready to handle
 
 ## Concurrency 
 
+Rust has fearless concurrency since concurrency problems and memory problems go well together  
+
+thread::spawn funciton with a closure as an argument containing the code we want creates a new thread with the code.  
+
+When the main Rust thread completes, all spawned threads are shut down whether or not they finished running.  
+- If you call .join on the thread to wait for it to finish  
+
+### Message Passing for Transfering Data Between Threads
+- Threads can send each other messgages containing data rather than sharing memory itself.  
+
+The Rust standard lib provides an implementation of channels, which is a programming concept where data is sent from one thread to another  
+- Has two halves: a transmitter and a receiver  
+
+The transmitter of a channel is the upstream location where you put data 
+
+The receiver is where the data ends up  
+
+If either the transmitter or receiver half of a channel are dropped, the channel is **closed**
+
+`mpsc` stands for multiple producer single consumer  
+
+When using mpsc::channel, it returns a transmitter and receiver. COmmon abbreviations are tx and rx
+
+let (tx, rx) = mpsc::channel();
+
+Receivers have two useful methods:
+- `recv`: short for receive, blocks the main thread's execution and waits until a value is sent down the channel. Returns Result<T, E>
+- `try_recv`: doesn't block but immediately returns a Result<T, E>
+    - Good if the thread has other work to do while waiting for messages since it can just periodically call this in between doing work  
+
+### In rust you can also communicate with shared memory in between threads
+
+Use mutexes to allow access to data from one thread at a time  
+
+Rust doesn't allow you to get unlocking and unlocking wrong
+- Won't allow us to access the data without calling lock  
+
+There is Arc<T> which is used instead of Rc<T> which is a shared reference that is safe across threads.  
+
+If the operation we are diong is simple numerical, there are simpler types than Mutex<T> which provide safe concurrent atomic access to primitive types and are provided by the `std::sync::atomic` module.  
+
+Rst does not have many concurrency features in the language but does in the stdlib.  
+
+The std::marker embedds Sync and Send in the language  
+
+The `Send` marker trait indicates that the ownership of values of the type implementing Send can be transferred between Threads  
+
+The `Sync` marker trait indicates that it is safe for the type implementing Sync to be referenced from multiple threads. T is sync if &T is Send
+
+Types made up from Send and Sync traits are automatically Send and Sync. If we want to manually implement these two traits, we need to use unsafe Rust code.  
+
