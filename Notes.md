@@ -1093,3 +1093,49 @@ There are cases when a single value might have multiple owners, and to enable th
 
 Cloning an `Rc<T>` also increases the reference count  
 
+## Building Web Server
+
+The two main protocols involved in web servers are HTTP and TCP  
+
+Both HTTP and TCP are request-response protocols meaning the client initiates the request and a server listens and provides a response  
+
+TCP is lower-level protocol that describes the details of how information gets from one server to another without specifying what the information is  
+
+HTTP defines the contents and is built ontop of TCP, sending data over TCP  
+
+A single stream represents an open connection between client and server, whereas a connection is the name for the full request and response process between client and server  
+
+HTTP is a text-based protocol with the format:
+
+Method Request-URI HTTP-Version CRLF  
+headers CRLF  
+message-body  
+
+Request: [
+    "GET / HTTP/1.1", **{Method Used} {URI} {HTTP VERSION CLIENT USES}**
+    "Host: 127.0.0.1:7878",
+    "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:99.0) Gecko/20100101 Firefox/99.0",
+    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language: en-US,en;q=0.5",
+    "Accept-Encoding: gzip, deflate, br",
+    "DNT: 1",
+    "Connection: keep-alive",
+    "Upgrade-Insecure-Requests: 1",
+    "Sec-Fetch-Dest: document",
+    "Sec-Fetch-Mode: navigate",
+    "Sec-Fetch-Site: none",
+    "Sec-Fetch-User: ?1",
+    "Cache-Control: max-age=0",
+]
+
+Responses have this format:
+
+HTTP-Version Status-Code Reason-Phrase CRLF  
+headers CRLF  
+message-body  
+
+A thread pool is a group of spawned threads that are waiting and ready to handle a task.  
+- Each task gets assigned to one of the threads in the pool  
+- Best to limit the number of threads rather than open a new one with each request as you can get DoS'd
+- Other ways to improve throughput are fork/join model, single-threaded async I/O, and multi-threaded async I/O  
+
