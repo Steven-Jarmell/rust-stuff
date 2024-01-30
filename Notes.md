@@ -1093,6 +1093,28 @@ There are cases when a single value might have multiple owners, and to enable th
 
 Cloning an `Rc<T>` also increases the reference count  
 
+Preventing memory leaks is not one of Rust's guarantees  
+
+RefCell<T> allows the interior mutability pattern.  
+
+The interior mutability design pattern allows you to mutate data even when there are immutable references to the data  
+- Uses `unsafe`  
+
+RefCell<T> is also for single-threaded scenaios  
+
+Recap:
+
+- Rc<T> enables owners of the same data, whereas Box<T> and RefCell<T> have single owners  
+- Box<T> allows immutable or mutable borrows checked at **compile** time, while Rc<T> allows only immutable borrows checked at **compile** time, and RefCell<T> allows immutable or mutable borrows checked at **runtime**
+
+You essentially wrap whatever you want an immutable/mutable borrow of, and then call the borrow or borrow_mut methods on it.  
+- Borrow returns Ref<T> and borrow_mut returns RefMut<T>  
+- RefCell<T> still keeps track of how many Ref<T> and RefMut<T> smart pointers there are and allows us to still have immutable borrows or one mutable borrow at any point, and if we violate these rules, we panic.  
+
+A common way to use RefCell<T> is in combination with Rc<T>. If you hvae a Rc<T> that holds a RefCell<T>, then you can get a value that has multiple owners that you can mutate.  
+
+You can create memory leaks with Rc<T> and RefCell<T> since you can make items refer to each other in a cycle, thus the reference count of each item will never reach 0.  
+
 ## Building Web Server
 
 The two main protocols involved in web servers are HTTP and TCP  
@@ -1138,4 +1160,6 @@ A thread pool is a group of spawned threads that are waiting and ready to handle
 - Each task gets assigned to one of the threads in the pool  
 - Best to limit the number of threads rather than open a new one with each request as you can get DoS'd
 - Other ways to improve throughput are fork/join model, single-threaded async I/O, and multi-threaded async I/O  
+
+## Concurrency 
 
