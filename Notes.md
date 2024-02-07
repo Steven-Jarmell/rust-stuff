@@ -1214,3 +1214,38 @@ The `Sync` marker trait indicates that it is safe for the type implementing Sync
 
 Types made up from Send and Sync traits are automatically Send and Sync. If we want to manually implement these two traits, we need to use unsafe Rust code.  
 
+## Object Oriented Rust Features
+
+Even though structs and enums with methods aren't called obejcts, they provide the same functionality as objects  
+
+### Encapsulation 
+
+We use the `pub` keyword to decide which modules, types, functions, and methods should be public  
+
+### Inheritance  
+
+Rust does not have inheritance, and has no way to define a struct that inherits the parent struct's fields and method implementations without using a macro  
+
+You use inheritance for two main reasons:
+1. Reuse of code
+2. Polymorphism, or allowing a child type to be used in the same places as the parent type  
+    - Polymorphism is a more general concept which just says code can work with data of multiple types  
+    - Rust uses generics to abstract over possible types and trait bounds to impose constraints on what types must provide.
+    - Called bounded parametric polymorphism.  
+
+You can use trait objects to allow for values of different types  
+
+When we use trait bound ong enerics, the compiler generates nongeneric implementations and methods for each concrete type we use in place of the generic type parameter, but when we do dynamic dispatch like in the GUI example, the compiler can't tell at compile time which method you're calling and the compiler will emit code which at runtime figures out the method to call.  
+
+When we use trait objects, Rust uses this dynamic dispatching.  
+
+Dynamic Dispatching prevents the compiler from choosing to inline a methods code which prevents optimizations, but provides us with flexibility.  
+
+### Implementing OOP
+
+The state pattern is an OOP design pattern which we define a set of states a value can have internally  
+- When business requirements of the program change, wen don't need ot change the code of the value holding the state or the code that uses the value  
+
+Because states implement the transitions between states, some of the states are coupled together  
+
+
