@@ -1275,4 +1275,65 @@ When values have different parts we can use the `..` syntax to use specific part
 
 There is a `@` operator which lets us create a variable that holds a value at the same time as we're testing that value for a pattern match  
 
+## Advanced Features  
+
+### Unsafe Rust
+
+Unsafe rust is used to tell the compiler to trust the programmer if it cannot confidently analyze the code  
+
+Since computer hardware is inherently unsafe, if Rust didn't let us do unsafe operations, we couldn't do certain tasks like interacting with the OS or writing your own OS  
+
+Unsafe superpowers:
+- Dereference a raw pointer
+- Call an unsafe function or method
+- Access or modify a mutable static variable
+- Implement an unsafe trait
+- Access fields of union S
+
+Unsafe doesn't turn off the borrow checker or disable other safety checks, it simply allows you to do the five features listed above.  
+
+By requiring these five operations to be in an unsafe block, we know that memory safety errors are within an unsafe block and makes them easier to debug.  
+
+To isolate unsafe code, it is often best to enclose it within a safe abstraction with a safe API  
+
+#### Dereferencing a Raw Pointer
+
+Raw pointers
+- Allowed to ignore borrow rules by having both immutable and mutable pointers or multiple mutiple pointers to the same location
+- Aren't guaranteed to point to valid memory
+- Are allowed to be null
+- Don't implement any automatic cleanup 
+
+Gives you greater performance at the cost of lack of guaranteed safety  
+
+You can create raw pointers in safe code but you can't dereference raw pointers outside an unsafe block.  
+
+let mut num = 5;  
+
+let r1 = &num as *const i32;  
+let r2 = &mut num as *mut i32;  
+
+You can also define functions as unsafe, and can thus only call them in an unsafe block  
+
+As long as you keep unsafe code in the block within a funciton, you do not need to mark the function itself as unsafe, and thus you can create safe functions that use unsafe code/functions.  
+
+Rust code has the `extern` keyword to facilitate the creation and use of a Foreign Funciton Interface, which is a way for a programming language to define functions and enable a different programming language to call those functions.  
+
+Functions declared within extern blocks are always unsafe, since other languages don't enforce Rust's rules and guarantees  
+
+Constants are allowed to duplicate their data whenever they're used, but immutable static variables have a fixed address in memory  
+
+Accessing and modifying mutable static variables is unsafe.  
+
+If multiple threads are accessing and mutating a static variable, it will lead to data races.  
+
+#### Unsafe Trait
+Used when at least one of its methods has some invariant that the compiler can't verify  
+
+#### Union 
+A union is similar to a struct but only one declared field is used in a particular instance at one time.  
+
+Primarily used to interface with unions in C code  
+
+### Advanced Traits  
 
