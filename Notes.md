@@ -1248,4 +1248,31 @@ The state pattern is an OOP design pattern which we define a set of states a val
 
 Because states implement the transitions between states, some of the states are coupled together  
 
+## Patterns and Matching
+
+`while let` allows a loop to run for as long as a pattern continues to match  
+
+Patterns come in two forms: refutable and irrefutable  
+
+Patterns that will match for any possible value passed are irrefutable  
+
+Refutable patterns can fail to match for some possible value  
+- Example: `if let Some(x) = a_value` is refutable if the a_value is NOne rather than Some  
+
+In match expressions you can match multiple patterns using the `|` syntax
+- `1 | 2 => println!("One or two");`
+
+You can match an inclusive range of values with the `..=` syntax  
+- `1..=5` matches if x is 1, 2, 3, 4, or 5
+
+Rust can only tell if a range is empty with char or numeric values.  
+
+Ignoring function parameters can be useful in cases when you're implementing a trait when you need a certain type signerature but the function body in you rimplementation doesn't need on eof the parameters  
+
+Putting `_` before a variable name lets the compiler know it is okay if it is not used  
+
+When values have different parts we can use the `..` syntax to use specific parts and ignore the rest  
+
+There is a `@` operator which lets us create a variable that holds a value at the same time as we're testing that value for a pattern match  
+
 
