@@ -1337,3 +1337,20 @@ Primarily used to interface with unions in C code
 
 ### Advanced Traits  
 
+When a trait has a generic parameter, it can be implemented for a type multiple times, changing the concrete types of the generic type parameters each time.  
+
+### Types
+
+Rust provides the ability to proivde a type alias to give an existing type another name  
+
+`type Kilometers = i32;`  
+
+## Macros
+Three Kinds:
+- Custom `#[derive]` macros 
+- Attribute-like macros that define custom attributes
+- Function-like macros that look like function calls but operate on the tokens specified as their argument 
+
+Macros are a way of writing code that writes other code  
+- Take a variable number of arguments  
+- More complex than function definitions  
